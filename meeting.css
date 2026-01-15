@@ -734,6 +734,37 @@ button {
     #chat-panel.open {
         transform: translateY(0);
     }
+
+    /* Flip Camera Button - Mobile Only */
+    #btn-flip-camera {
+        display: flex !important;
+        /* Force show on mobile */
+    }
+}
+
+/* Flip Camera Button Base Styles */
+#btn-flip-camera {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: none;
+    /* Hidden by default (Desktop) */
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    pointer-events: auto;
+    /* Ensure clickable */
+}
+
+#btn-flip-camera:active {
+    transform: rotate(180deg);
 }
 
 /* --- Chat UI Styles (Global/Desktop) --- */
