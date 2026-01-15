@@ -448,7 +448,84 @@ async function toggleScreenShare() {
 
         replaceTrackForPeers(videoTrack);
         btnScreen.classList.add('active');
+        replaceTrackForPeers(videoTrack);
+        btnScreen.classList.add('active');
     } catch (err) { console.error(err); }
+}
+
+// Flip Camera Logic
+const btnFlipCamera = document.getElementById('btn-flip-camera');
+if (btnFlipCamera) {
+    btnFlipCamera.addEventListener('click', toggleCamera);
+}
+
+let currentFacingMode = 'user'; // Default to Front Camera
+
+async function toggleCamera() {
+    if (myScreenStream) {
+        showToast('Stop screen share to flip camera', 'warning');
+        return;
+    }
+
+    try {
+        // Toggle Mode
+        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+
+        // Stop current video track
+        const oldVideoTrack = myStream.getVideoTracks()[0];
+        if (oldVideoTrack) oldVideoTrack.stop();
+
+        // Get new stream
+        const constraints = {
+            video: {
+                facingMode: { exact: currentFacingMode },
+                width: { ideal: 480 }, // Maintain mobile friendly resolution
+                height: { ideal: 360 }
+            },
+            audio: false // Don't want to re-request audio
+        };
+
+        const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const newVideoTrack = newStream.getVideoTracks()[0];
+
+        // Replace track in local stream object
+        myStream.removeTrack(oldVideoTrack);
+        myStream.addTrack(newVideoTrack);
+
+        // Update Local Video Element
+        const localVideo = document.querySelector('.video-tile.is-local video');
+        if (localVideo) {
+            localVideo.srcObject = myStream;
+            // Mirror only front camera
+            localVideo.style.transform = currentFacingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+        }
+
+        // Update Peers
+        replaceTrackForPeers(newVideoTrack);
+
+        // Update Button Icon Animation
+        btnFlipCamera.style.transform = 'rotate(180deg)';
+        setTimeout(() => btnFlipCamera.style.transform = 'rotate(0deg)', 300);
+
+    } catch (err) {
+        console.error("Flip Camera Error:", err);
+        showToast('Camera switch failed or not supported', 'error');
+        // Fallback: revert mode if failed
+        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+
+        // Try to recover user facing camera without 'exact' if environment failed
+        if (err.name === 'OverconstrainedError') {
+            // Retry with basic constraints
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const track = stream.getVideoTracks()[0];
+                myStream.addTrack(track);
+                const localVideo = document.querySelector('.video-tile.is-local video');
+                if (localVideo) localVideo.srcObject = myStream;
+                replaceTrackForPeers(track);
+            } catch (e) { }
+        }
+    }
 }
 
 const btnRecord = document.getElementById('btn-record');
