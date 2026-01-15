@@ -147,12 +147,30 @@ function showPermissionModal() {
 
 const iceConfig = {
     iceServers: [
+        // --- 1. STUN Servers (Free & Fast) ---
+        // These are tried FIRST. If they work (like Wi-Fi to Wi-Fi), 
+        // your TURN data will NOT be used.
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
-        { urls: 'stun:global.stun.twilio.com:3478' }
+        { urls: 'stun:global.stun.twilio.com:3478' },
+
+        // --- 2. TURN Servers (Backup for Mobile Data) ---
+        // These are used ONLY if Direct/STUN connection fails.
+        {
+            urls: "turn:global.turn.metered.ca:80",
+            username: "86dbfc0efa660639e0566663",
+            credential: "owjs/Vkh7/P+8zN/"
+        },
+        {
+            urls: "turn:global.turn.metered.ca:443",
+            username: "86dbfc0efa660639e0566663",
+            credential: "owjs/Vkh7/P+8zN/"
+        },
+        {
+            urls: "turn:global.turn.metered.ca:443?transport=tcp",
+            username: "86dbfc0efa660639e0566663",
+            credential: "owjs/Vkh7/P+8zN/"
+        }
     ]
 };
 
